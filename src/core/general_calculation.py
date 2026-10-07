@@ -73,3 +73,44 @@ class OrthogonalizationMethod:
         self.calculate_orthogonalization_method()
 
 
+    @staticmethod
+    def scalar_product(vector1: list, vector2: list) -> float:
+        """
+        Функция для вычисления скалярного произведения двух векторов
+
+        :param vector1: массив с координатами первого вектора
+        :param vector2: массив с координатами второго вектора
+
+        :return: float - результат вычисленного скалярного произведения
+        """
+
+        return sum(coord_v1 * coord_v2 for coord_v1, coord_v2 in zip(vector1, vector2))
+
+
+    @staticmethod
+    def multiplication_by_scal(vector: list, scal: float) -> list:
+        """
+        Функция для умножения вектора на скаляр
+
+        :param vector: list - принимает вектор.
+        :param scal: float - принимает число, на которое будет умножаться вектор
+
+        :return: list - вернёт массив с координатами вектора,
+         но уже умноженными на скаляр
+        """
+
+        return [scal * coord for coord in vector]
+
+
+    @staticmethod
+    def calculating_difference_of_vectors(vector1: list, vector2: list) -> list :
+        """
+        Функция для вычисления разности двух векторов
+
+        :param vector1: массив с координатами первого вектора
+        :param vector2: массив с координатами второго вектора
+
+        :return:вернёт массив с вычисленным вектором-разностью
+        """
+
+        return [coord_v1 - coord_v2 for coord_v1,coord_v2 in zip(vector1, vector2)]
