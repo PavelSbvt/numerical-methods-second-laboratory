@@ -1,3 +1,6 @@
+from utils.output_rich import Rich
+
+
 # Вариант 331
 
 # Численный метод решения системы уравнений - метод ортогонализации
@@ -15,3 +18,52 @@
 # 0,296
 # 0,492
 # 1,454
+
+class OrthogonalizationMethod:
+    """
+    Класс для вычисления решения СЛАУ методом ортогонализации
+    """
+
+    def __init__(self):
+
+        # массив элементов матрицы А
+        self.matrix_A: list = \
+            [
+                [0.405, 0.05, 0.04, 0, 0.09],
+                [-0.061, 0.53, 0.073, 0.11, -0.06],
+                [0.07, -0.036, 0.38, 0.03, 0.02],
+                [-0.05, 0, 0.066, 0.58, 0.23],
+                [0, 0.081, -0.05, 0, 0.41]
+            ]
+
+        # Элементы вектора b
+        self.vector_b: list = \
+            [
+                -1.475,
+                2.281,
+                0.296,
+                0.492,
+                1.454
+            ]
+
+
+    def calculate_orthogonalization_method(self):
+        """
+        Функция для выполнения вычислений с матрицей методом ортогонализации
+
+        :return:
+        """
+
+        Rich.print_spacer()
+        Rich.debug_log("Исходная матрица А:")
+        for row in self.matrix_A:
+            Rich.debug_log(f"   {row}")
+        Rich.print_spacer()
+
+
+    def run(self):
+        Rich.debug_log("Запуск вычислений решения СЛАУ методом ортогонализации")
+
+        self.calculate_orthogonalization_method()
+
+
