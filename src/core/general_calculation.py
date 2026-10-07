@@ -27,7 +27,7 @@ class OrthogonalizationMethod:
     def __init__(self):
 
         # массив элементов матрицы А
-        self.matrix_A: list = \
+        self.matrix_A: list[list] = \
             [
                 [0.405, 0.05, 0.04, 0, 0.09],
                 [-0.061, 0.53, 0.073, 0.11, -0.06],
@@ -57,12 +57,18 @@ class OrthogonalizationMethod:
         Rich.print_spacer()
         Rich.debug_log("Исходная матрица А:")
         for row in self.matrix_A:
-            Rich.debug_log(f"   {row}")
+            # выравнивание вправо с точностью до тысячных и заданной шириной "ячейки"
+            Rich.debug_log("".join(f"{element:>8.3f}" for element in row))
+        Rich.print_spacer()
+
+        Rich.debug_log("Элементы вектора b:")
+        for element in self.vector_b:
+            Rich.debug_log(f"   {element}")
         Rich.print_spacer()
 
 
     def run(self):
-        Rich.debug_log("Запуск вычислений решения СЛАУ методом ортогонализации")
+        Rich.simple_log("Запуск вычислений решения СЛАУ методом ортогонализации")
 
         self.calculate_orthogonalization_method()
 
