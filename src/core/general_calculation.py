@@ -1,3 +1,5 @@
+import math
+
 from utils.output_rich import Rich
 
 
@@ -47,12 +49,74 @@ class OrthogonalizationMethod:
             ]
 
 
+    def print_system_equations(self):
+        """
+        Функция для вывода системы уравнений вида а11*х1+...+b1=0
+
+        :return: None
+        """
+
+        Rich.debug_log("Вывод системы однородных уравнений:")
+
+        for i, row in enumerate(self.matrix_A):
+            terms = []
+            for j, a in enumerate(row):
+                x_index = j + 1
+                # if a == 0:
+                #     continue
+                sign = "-" if a < 0 else "+"
+                coef = abs(a)
+                terms.append(f"{sign} {coef:.3f}·x{x_index}")
+
+            # первое слагаемое без первого "+"
+            equation = " ".join(terms).lstrip("+ ").strip()
+            equation += f" + ({-self.vector_b[i]:.3f}) = 0"
+
+            Rich.debug_log(equation)
+
+        Rich.print_spacer()
+
+
     def calculate_orthogonalization_method(self):
         """
         Функция для выполнения вычислений с матрицей методом ортогонализации
 
         :return:
         """
+
+        n = len(self.matrix_A)
+
+        # векторы ai
+        vectors_ai = [
+            self.matrix_A[i] + [self.vector_b[i]]
+            for i in range(n)
+        ]
+
+        vectors_ai.append([0.0] * n + [1.0]) # an+1
+
+        vectors_v = []
+
+        for a in vectors_ai:
+            u = a[:]
+            for v in vectors_v:
+                coeff = self.scalar_product(a, v)
+
+                u = self.calculating_difference_of_vectors(
+                    u, self.multiplication_by_scal(v, coeff)
+                )
+            normalize = math.sqrt(self.scalar_product(u, u))
+            v = self.multiplication_by_scal(u, 1.0/normalize)
+            vectors_v.append(v)
+        v_last = vectors_v[-1]
+
+        x = [v_last[i]/v_last[n] for i in range(n)]
+
+        print(x)
+
+
+
+    def run(self):
+        Rich.simple_log("Запуск вычислений решения СЛАУ методом ортогонализации")
 
         Rich.print_spacer()
         Rich.debug_log("Исходная матрица А:")
@@ -66,9 +130,7 @@ class OrthogonalizationMethod:
             Rich.debug_log(f"   {element}")
         Rich.print_spacer()
 
-
-    def run(self):
-        Rich.simple_log("Запуск вычислений решения СЛАУ методом ортогонализации")
+        self.print_system_equations()
 
         self.calculate_orthogonalization_method()
 
