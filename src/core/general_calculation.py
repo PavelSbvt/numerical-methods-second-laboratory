@@ -77,51 +77,99 @@ class OrthogonalizationMethod:
 
         Rich.print_spacer()
 
-
     def calculate_orthogonalization_method(self):
         """
         Функция для выполнения вычислений с матрицей методом ортогонализации
 
-        :return:
+        :return: None
         """
 
         n = len(self.matrix_A)
 
         # векторы ai
         vectors_ai = [
-            self.matrix_A[i] + [-1 * self.vector_b[i]]
+            self.matrix_A[i] + [-self.vector_b[i]]
             for i in range(n)
         ]
+        vectors_ai.append([0.0] * n + [1.0])  # an+1
 
-        vectors_ai.append([0.0] * n + [1.0]) # an+1
+        Rich.simple_log(f"Сформировано {len(vectors_ai)} расширенных векторов "
+                        f"(матрица A + столбец -b + служебный вектор)")
 
         vectors_v = []
 
-        for a in vectors_ai:
-            u = a[:]
-            for v in vectors_v:
-                ratio = self.scalar_product(u, v)
+        for idx, a in enumerate(vectors_ai):
+            label = f"a{idx + 1}" if idx < n else "a(n+1) (служебный)"
 
-                u = self.calculating_difference_of_vectors(
-                    u, self.multiplication_by_scal(v, ratio)
-                )
+            Rich.print_spacer()
+            Rich.debug_log(f"Шаг {idx + 1}: обрабатываем вектор {label} = "
+                           f"[{', '.join(f'{c:.4f}' for c in a)}]")
+
+            u = a[:]
+
+            if not vectors_v:
+                Rich.debug_log("  Это первый вектор — проекции вычитать не на что, "
+                               "u = a")
+            else:
+                for j, v in enumerate(vectors_v, 1):
+                    ratio = self.scalar_product(u, v)
+                    proj = self.multiplication_by_scal(v, ratio)
+
+                    Rich.debug_log(f"  Вычитаем проекцию на v{j}: "
+                                   f"<u, v{j}> = {ratio: .6f}")
+
+                    u = self.calculating_difference_of_vectors(u, proj)
+
+                    Rich.debug_log(f"  u = u - {ratio: .6f}·v{j} = "
+                                   f"[{', '.join(f'{c:.6f}' for c in u)}]")
+
             normalize = math.sqrt(self.scalar_product(u, u))
-            v = self.multiplication_by_scal(u, 1.0/normalize)
+
+            Rich.debug_log(f"  |u| = {normalize:.6f}")
+
+            v = self.multiplication_by_scal(u, 1.0 / normalize)
             vectors_v.append(v)
+
+            Rich.debug_log(f"  v{idx + 1} = u / |u| = "
+                           f"[{', '.join(f'{c:.6f}' for c in v)}]")
+
+            # Проверим ортогональность с предыдущими v — полезно для наглядности
+            if vectors_v[:-1]:
+                checks = [
+                    f"<v{idx + 1}, v{k}> = {self.scalar_product(v, prev): .2e}"
+                    for k, prev in enumerate(vectors_v[:-1], 1)
+                ]
+                Rich.debug_log("  Проверка ортогональности: " + "; ".join(checks))
+
         v_last = vectors_v[-1]
 
-        x = [v_last[i]/v_last[n] for i in range(n)]
+        Rich.print_spacer()
+        Rich.debug_log("Последний вектор v(n+1) = "
+                       f"[{', '.join(f'{c:.6f}' for c in v_last)}]")
+        Rich.debug_log("Решение: x_i = v(n+1)[i] / v(n+1)[n]")
 
-        Rich.success_log("Решение системы: ")
+        x = [v_last[i] / v_last[n] for i in range(n)]
+
+        Rich.success_log("Решение системы:")
         for i, val in enumerate(x, 1):
-            Rich.simple_log(f"x{i} = {val:.6f}")
+            Rich.simple_log(f"  x{i} = {val:.6f}")
 
-        residual = [sum(self.matrix_A[i][j] * x[j] for j in range(n)) - self.vector_b[i] for i in range(n)]
+        residual = [
+            sum(self.matrix_A[i][j] * x[j] for j in range(n)) - self.vector_b[i]
+            for i in range(n)
+        ]
+
         Rich.print_table(
             title="Невязка r = A·x - b",
             cols=["i", "r_i"],
-            rows=[[i, f"{r:.20f}"] for i, r in enumerate(residual, 1)],
+            rows=[[i, f"{r:.3e}"] for i, r in enumerate(residual, 1)],
         )
+
+        max_res = max(abs(r) for r in residual)
+        if max_res < 1e-10:
+            Rich.success_log(f"Максимум |r_i| = {max_res:.3e} — решение корректно")
+        else:
+            Rich.warning_log(f"Максимум |r_i| = {max_res:.3e} — возможна ошибка")
 
 
     def run(self):
