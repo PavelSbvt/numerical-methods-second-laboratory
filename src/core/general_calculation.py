@@ -62,9 +62,10 @@ class OrthogonalizationMethod:
             terms = []
             for j, a in enumerate(row):
                 x_index = j + 1
-                # if a == 0:
-                #     continue
-                sign = "-" if a < 0 else "+"
+                if a < 0:
+                    sign = "-"
+                else:
+                    sign = "+"
                 coef = abs(a)
                 terms.append(f"{sign} {coef:.3f}·x{x_index}")
 
@@ -88,7 +89,7 @@ class OrthogonalizationMethod:
 
         # векторы ai
         vectors_ai = [
-            self.matrix_A[i] + [self.vector_b[i]]
+            self.matrix_A[i] + [-1 * self.vector_b[i]]
             for i in range(n)
         ]
 
@@ -99,10 +100,10 @@ class OrthogonalizationMethod:
         for a in vectors_ai:
             u = a[:]
             for v in vectors_v:
-                coeff = self.scalar_product(a, v)
+                ratio = self.scalar_product(u, v)
 
                 u = self.calculating_difference_of_vectors(
-                    u, self.multiplication_by_scal(v, coeff)
+                    u, self.multiplication_by_scal(v, ratio)
                 )
             normalize = math.sqrt(self.scalar_product(u, u))
             v = self.multiplication_by_scal(u, 1.0/normalize)
@@ -111,8 +112,16 @@ class OrthogonalizationMethod:
 
         x = [v_last[i]/v_last[n] for i in range(n)]
 
-        print(x)
+        Rich.success_log("Решение системы: ")
+        for i, val in enumerate(x, 1):
+            Rich.simple_log(f"x{i} = {val:.6f}")
 
+        residual = [sum(self.matrix_A[i][j] * x[j] for j in range(n)) - self.vector_b[i] for i in range(n)]
+        Rich.print_table(
+            title="Невязка r = A·x - b",
+            cols=["i", "r_i"],
+            rows=[[i, f"{r:.20f}"] for i, r in enumerate(residual, 1)],
+        )
 
 
     def run(self):
