@@ -77,6 +77,7 @@ class OrthogonalizationMethod:
 
         Rich.print_spacer()
 
+
     def calculate_orthogonalization_method(self):
         """
         Функция для выполнения вычислений с матрицей методом ортогонализации
@@ -91,7 +92,7 @@ class OrthogonalizationMethod:
             self.matrix_A[i] + [-self.vector_b[i]]
             for i in range(n)
         ]
-        vectors_ai.append([0.0] * n + [1.0])  # an+1
+        vectors_ai.append([0.0] * n + [1.0])  # a(n+1)
 
         Rich.simple_log(f"Сформировано {len(vectors_ai)} расширенных векторов "
                         f"(матрица A + столбец -b + служебный вектор)")
@@ -110,6 +111,7 @@ class OrthogonalizationMethod:
             if not vectors_v:
                 Rich.debug_log("  Это первый вектор — проекции вычитать не на что, "
                                "u = a")
+
             else:
                 for j, v in enumerate(vectors_v, 1):
                     ratio = self.scalar_product(u, v)
@@ -136,7 +138,7 @@ class OrthogonalizationMethod:
             # Проверим ортогональность с предыдущими v — полезно для наглядности
             if vectors_v[:-1]:
                 checks = [
-                    f"<v{idx + 1}, v{k}> = {self.scalar_product(v, prev): .2e}"
+                    f"<v{idx + 1}, v{k}> = {self.scalar_product(v, prev): .10f}"
                     for k, prev in enumerate(vectors_v[:-1], 1)
                 ]
                 Rich.debug_log("  Проверка ортогональности: " + "; ".join(checks))
@@ -162,14 +164,14 @@ class OrthogonalizationMethod:
         Rich.print_table(
             title="Невязка r = A·x - b",
             cols=["i", "r_i"],
-            rows=[[i, f"{r:.3e}"] for i, r in enumerate(residual, 1)],
+            rows=[[i, f"{r:.20f}"] for i, r in enumerate(residual, 1)],
         )
 
         max_res = max(abs(r) for r in residual)
-        if max_res < 1e-10:
-            Rich.success_log(f"Максимум |r_i| = {max_res:.3e} — решение корректно")
+        if max_res < 0.1**10:
+            Rich.success_log(f"Максимум |r_i| = {max_res:.8f} — решение корректно")
         else:
-            Rich.warning_log(f"Максимум |r_i| = {max_res:.3e} — возможна ошибка")
+            Rich.warning_log(f"Максимум |r_i| = {max_res:.8f} — возможна ошибка")
 
 
     def run(self):
